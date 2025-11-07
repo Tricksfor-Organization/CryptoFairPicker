@@ -1,12 +1,12 @@
 using CryptoFairPicker.Strategies;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests;
 
 public class ServiceCollectionExtensionsTests
 {
-    [Fact]
+    [Test]
     public void AddCryptoFairPicker_RegistersServices()
     {
         // Arrange
@@ -20,13 +20,13 @@ public class ServiceCollectionExtensionsTests
         var picker = provider.GetService<IFairPicker>();
         var strategy = provider.GetService<IPickerStrategy>();
         
-        Assert.NotNull(picker);
-        Assert.NotNull(strategy);
-        Assert.IsType<FairPicker>(picker);
-        Assert.IsType<CsprngStrategy>(strategy);
+        Assert.That(picker, Is.Not.Null);
+        Assert.That(strategy, Is.Not.Null);
+        Assert.That(picker, Is.TypeOf<FairPicker>());
+        Assert.That(strategy, Is.TypeOf<CsprngStrategy>());
     }
 
-    [Fact]
+    [Test]
     public void AddCryptoFairPicker_WithCustomStrategy_RegistersStrategy()
     {
         // Arrange
@@ -40,12 +40,12 @@ public class ServiceCollectionExtensionsTests
         var picker = provider.GetService<IFairPicker>();
         var strategy = provider.GetService<IPickerStrategy>();
         
-        Assert.NotNull(picker);
-        Assert.NotNull(strategy);
-        Assert.IsType<CsprngStrategy>(strategy);
+        Assert.That(picker, Is.Not.Null);
+        Assert.That(strategy, Is.Not.Null);
+        Assert.That(strategy, Is.TypeOf<CsprngStrategy>());
     }
 
-    [Fact]
+    [Test]
     public void AddCommitRevealPicker_RegistersCommitRevealStrategy()
     {
         // Arrange
@@ -60,13 +60,13 @@ public class ServiceCollectionExtensionsTests
         var strategy = provider.GetService<IPickerStrategy>();
         var commitReveal = provider.GetService<CommitRevealStrategy>();
         
-        Assert.NotNull(picker);
-        Assert.NotNull(strategy);
-        Assert.NotNull(commitReveal);
-        Assert.IsType<CommitRevealStrategy>(strategy);
+        Assert.That(picker, Is.Not.Null);
+        Assert.That(strategy, Is.Not.Null);
+        Assert.That(commitReveal, Is.Not.Null);
+        Assert.That(strategy, Is.TypeOf<CommitRevealStrategy>());
     }
 
-    [Fact]
+    [Test]
     public void AddDrandBeaconPicker_RegistersBeaconStrategy()
     {
         // Arrange
@@ -80,12 +80,12 @@ public class ServiceCollectionExtensionsTests
         var picker = provider.GetService<IFairPicker>();
         var strategy = provider.GetService<IPickerStrategy>();
         
-        Assert.NotNull(picker);
-        Assert.NotNull(strategy);
-        Assert.IsType<DrandBeaconStrategy>(strategy);
+        Assert.That(picker, Is.Not.Null);
+        Assert.That(strategy, Is.Not.Null);
+        Assert.That(strategy, Is.TypeOf<DrandBeaconStrategy>());
     }
 
-    [Fact]
+    [Test]
     public void AddDrandBeaconPicker_WithCustomUrl_UsesCustomUrl()
     {
         // Arrange
@@ -98,11 +98,11 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         var strategy = provider.GetService<IPickerStrategy>();
-        Assert.NotNull(strategy);
-        Assert.IsType<DrandBeaconStrategy>(strategy);
+        Assert.That(strategy, Is.Not.Null);
+        Assert.That(strategy, Is.TypeOf<DrandBeaconStrategy>());
     }
 
-    [Fact]
+    [Test]
     public void RegisteredPicker_CanPickWinner()
     {
         // Arrange
@@ -115,10 +115,10 @@ public class ServiceCollectionExtensionsTests
         var result = picker.PickWinner(10);
 
         // Assert
-        Assert.InRange(result, 0, 9);
+        Assert.That(result, Is.InRange(0, 9));
     }
 
-    [Fact]
+    [Test]
     public void TransientServices_CreateNewInstances()
     {
         // Arrange
@@ -131,10 +131,10 @@ public class ServiceCollectionExtensionsTests
         var picker2 = provider.GetRequiredService<IFairPicker>();
 
         // Assert
-        Assert.NotSame(picker1, picker2);
+        Assert.That(picker1, Is.Not.SameAs(picker2));
     }
 
-    [Fact]
+    [Test]
     public void CommitRevealStrategy_IsSingleton()
     {
         // Arrange
@@ -147,6 +147,6 @@ public class ServiceCollectionExtensionsTests
         var strategy2 = provider.GetRequiredService<CommitRevealStrategy>();
 
         // Assert
-        Assert.Same(strategy1, strategy2);
+        Assert.That(strategy1, Is.SameAs(strategy2));
     }
 }

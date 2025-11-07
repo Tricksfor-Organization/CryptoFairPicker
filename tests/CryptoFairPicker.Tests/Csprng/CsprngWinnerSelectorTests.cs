@@ -1,11 +1,11 @@
 using CryptoFairPicker.Csprng;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests.Csprng;
 
 public class CsprngWinnerSelectorTests
 {
-    [Fact]
+    [Test]
     public void PickWinner_ReturnsValueInCorrectRange()
     {
         // Arrange
@@ -16,10 +16,10 @@ public class CsprngWinnerSelectorTests
         var winner = selector.PickWinner(10, round);
 
         // Assert
-        Assert.InRange(winner, 1, 10);
+        Assert.That(winner, Is.InRange(1, 10));
     }
 
-    [Fact]
+    [Test]
     public async Task PickWinnerAsync_ReturnsValueInCorrectRange()
     {
         // Arrange
@@ -30,10 +30,10 @@ public class CsprngWinnerSelectorTests
         var winner = await selector.PickWinnerAsync(10, round);
 
         // Assert
-        Assert.InRange(winner, 1, 10);
+        Assert.That(winner, Is.InRange(1, 10));
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_ThrowsForInvalidN()
     {
         // Arrange
@@ -45,7 +45,7 @@ public class CsprngWinnerSelectorTests
         Assert.Throws<ArgumentException>(() => selector.PickWinner(-1, round));
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_ThrowsForNullRound()
     {
         // Arrange
@@ -55,7 +55,7 @@ public class CsprngWinnerSelectorTests
         Assert.Throws<ArgumentNullException>(() => selector.PickWinner(10, null!));
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_ProducesVariedResults()
     {
         // Arrange
@@ -70,6 +70,6 @@ public class CsprngWinnerSelectorTests
         }
 
         // Assert - Should get varied results
-        Assert.True(results.Count > 50, "CSPRNG selector should produce varied results");
+        Assert.That(results.Count, Is.GreaterThan(50), "CSPRNG selector should produce varied results");
     }
 }

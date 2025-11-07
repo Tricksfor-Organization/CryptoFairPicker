@@ -1,18 +1,18 @@
 using CryptoFairPicker.Strategies;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests;
 
 public class FairPickerTests
 {
-    [Fact]
+    [Test]
     public void Constructor_ThrowsForNullStrategy()
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new FairPicker(null!));
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_DelegatesToStrategy()
     {
         // Arrange
@@ -24,10 +24,10 @@ public class FairPickerTests
         var result = picker.PickWinner(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public async Task PickWinnerAsync_DelegatesToStrategy()
     {
         // Arrange
@@ -39,10 +39,10 @@ public class FairPickerTests
         var result = await picker.PickWinnerAsync(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_ThrowsForInvalidOptionCount()
     {
         // Arrange
@@ -54,19 +54,19 @@ public class FairPickerTests
         Assert.Throws<ArgumentException>(() => picker.PickWinner(-1));
     }
 
-    [Fact]
-    public async Task PickWinnerAsync_ThrowsForInvalidOptionCount()
+    [Test]
+    public void PickWinnerAsync_ThrowsForInvalidOptionCount()
     {
         // Arrange
         var strategy = new CsprngStrategy();
         var picker = new FairPicker(strategy);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => picker.PickWinnerAsync(0));
-        await Assert.ThrowsAsync<ArgumentException>(() => picker.PickWinnerAsync(-1));
+        Assert.ThrowsAsync<ArgumentException>(async () => await picker.PickWinnerAsync(0));
+        Assert.ThrowsAsync<ArgumentException>(async () => await picker.PickWinnerAsync(-1));
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_WorksWithCommitRevealStrategy()
     {
         // Arrange
@@ -78,11 +78,11 @@ public class FairPickerTests
         var result = picker.PickWinner(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
-        Assert.NotNull(strategy.CommitmentHash);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
+        Assert.That(strategy.CommitmentHash, Is.Not.Null);
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_ProducesUniformDistribution()
     {
         // Arrange
@@ -105,7 +105,7 @@ public class FairPickerTests
         
         foreach (var count in counts)
         {
-            Assert.InRange(count, expected - tolerance, expected + tolerance);
+            Assert.That(count, Is.InRange(expected - tolerance, expected + tolerance));
         }
     }
 }
