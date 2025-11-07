@@ -16,6 +16,8 @@ public class DrandRandomSource : IFairRandomSource
     private readonly DrandOptions _options;
     private readonly AsyncRetryPolicy _retryPolicy;
 
+    private const int MaxRejectionSamplingAttempts = 1000;
+
     /// <summary>
     /// Initializes a new instance of DrandRandomSource.
     /// </summary>
@@ -45,6 +47,8 @@ public class DrandRandomSource : IFairRandomSource
     /// <inheritdoc />
     public int NextInt(int toExclusive, RoundId round)
     {
+        // Note: Using GetAwaiter().GetResult() is acceptable here as this is a library method
+        // that may be called from synchronous contexts. Users should prefer NextIntAsync when possible.
         return NextIntAsync(toExclusive, round).GetAwaiter().GetResult();
     }
 
@@ -160,9 +164,9 @@ public class DrandRandomSource : IFairRandomSource
             counter++;
 
             // Sanity check to prevent infinite loop (should never happen in practice)
-            if (counter > 1000)
+            if (counter > MaxRejectionSamplingAttempts)
             {
-                throw new InvalidOperationException("Failed to generate random number after 1000 attempts using rejection sampling.");
+                throw new InvalidOperationException($"Failed to generate random number after {MaxRejectionSamplingAttempts} attempts using rejection sampling.");
             }
         }
     }

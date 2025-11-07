@@ -76,8 +76,11 @@ public class DrandRandomSourceTests
         var differences = 0;
         for (int i = 0; i < 10; i++)
         {
-            var mockH1 = CreateMockHttpHandler($"{i:X64}");
-            var mockH2 = CreateMockHttpHandler($"{i + 1:X64}");
+            // Create distinct 64-character hex strings
+            var hex1 = new string('a', 63) + i.ToString("x");
+            var hex2 = new string('b', 63) + i.ToString("x");
+            var mockH1 = CreateMockHttpHandler(hex1);
+            var mockH2 = CreateMockHttpHandler(hex2);
             var hc1 = new HttpClient(mockH1.Object);
             var hc2 = new HttpClient(mockH2.Object);
             var s1 = new DrandRandomSource(hc1, options);
@@ -195,7 +198,9 @@ public class DrandRandomSourceTests
 
         for (int i = 0; i < iterations; i++)
         {
-            var mockHandler = CreateMockHttpHandler($"{i:X64}");
+            // Create distinct 64-character hex string for each iteration
+            var hex = i.ToString("x").PadLeft(64, 'f');
+            var mockHandler = CreateMockHttpHandler(hex);
             var httpClient = new HttpClient(mockHandler.Object);
             var source = new DrandRandomSource(httpClient, options);
             var round = RoundId.FromRound(i);

@@ -209,8 +209,7 @@ var futureRound = CalculateFutureRound(hoursFromNow: 1);
 
 // Announce publicly
 Console.WriteLine($"The draw will use drand round {futureRound}");
-Console.WriteLine($"Verify at: https://api.drand.sh/public/.../
-{futureRound}");
+Console.WriteLine($"Verify at: https://api.drand.sh/public/.../({futureRound}");
 
 // Wait for the round to be published...
 // (approximately 1 hour)
