@@ -77,14 +77,37 @@ public class DrandBeaconStrategy : IPickerStrategy
     /// <returns>The selected index.</returns>
     private static int DerivePickFromRandomness(byte[] randomness, int optionCount)
     {
-        // Hash the randomness to ensure uniform distribution
-        var hash = SHA256.HashData(randomness);
+        // Use the randomness as a seed for HMAC to generate uniform values
+        using var hmac = new HMACSHA256(randomness);
+        var counter = 0;
         
-        // Convert first 8 bytes to ulong
-        var value = BitConverter.ToUInt64(hash, 0);
-        
-        // Use modulo for simplicity - bias is negligible for cryptographic randomness
-        return (int)(value % (ulong)optionCount);
+        while (true)
+        {
+            // Generate deterministic random bytes from the randomness
+            var input = BitConverter.GetBytes(counter);
+            var hash = hmac.ComputeHash(input);
+            
+            // Convert first 8 bytes to ulong
+            var value = BitConverter.ToUInt64(hash, 0);
+            
+            // Calculate the maximum valid value to avoid bias
+            var maxValue = ulong.MaxValue - (ulong.MaxValue % (ulong)optionCount);
+            
+            // Use rejection sampling for uniform distribution
+            if (value < maxValue)
+            {
+                return (int)(value % (ulong)optionCount);
+            }
+            
+            // Rejection sampling: try again with next counter value
+            counter++;
+            
+            // Sanity check to prevent infinite loop (should never happen in practice)
+            if (counter > 1000)
+            {
+                throw new InvalidOperationException("Failed to generate random number after 1000 attempts");
+            }
+        }
     }
 
     /// <summary>

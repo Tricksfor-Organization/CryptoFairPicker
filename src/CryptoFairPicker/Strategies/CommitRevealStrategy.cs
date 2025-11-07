@@ -101,20 +101,37 @@ public class CommitRevealStrategy : IPickerStrategy
 
     private static int DerivePickFromSecret(byte[] secret, int optionCount)
     {
-        // Use HMAC-SHA256 to derive a uniform value from the secret
-        // This ensures the result is deterministic and uniformly distributed
+        // Use HMAC-SHA256 to derive uniform values from the secret
         using var hmac = new HMACSHA256(secret);
-        var derived = hmac.ComputeHash(Encoding.UTF8.GetBytes("pick"));
+        var counter = 0;
         
-        // Convert first 8 bytes to ulong for larger range
-        var value = BitConverter.ToUInt64(derived, 0);
-        
-        // Use rejection sampling to avoid modulo bias
-        var maxValue = ulong.MaxValue - (ulong.MaxValue % (ulong)optionCount);
-        
-        // In practice, rejection sampling would loop, but for deterministic behavior
-        // we'll use a simple modulo here since the bias is negligible for large ranges
-        return (int)(value % (ulong)optionCount);
+        while (true)
+        {
+            // Generate deterministic random bytes from the secret
+            var input = Encoding.UTF8.GetBytes($"pick:{counter}");
+            var derived = hmac.ComputeHash(input);
+            
+            // Convert first 8 bytes to ulong for larger range
+            var value = BitConverter.ToUInt64(derived, 0);
+            
+            // Calculate the maximum valid value to avoid modulo bias
+            var maxValue = ulong.MaxValue - (ulong.MaxValue % (ulong)optionCount);
+            
+            // Use rejection sampling to ensure uniform distribution
+            if (value < maxValue)
+            {
+                return (int)(value % (ulong)optionCount);
+            }
+            
+            // Rejection sampling: try again with next counter value
+            counter++;
+            
+            // Sanity check to prevent infinite loop (should never happen in practice)
+            if (counter > 1000)
+            {
+                throw new InvalidOperationException("Failed to generate random number after 1000 attempts");
+            }
+        }
     }
 
     /// <summary>
