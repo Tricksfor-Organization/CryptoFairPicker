@@ -1,20 +1,19 @@
 using CryptoFairPicker.Drand;
 using Microsoft.Extensions.Options;
-using Moq;
-using Moq.Protected;
+using NSubstitute;
 using System.Net;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests.Drand;
 
 public class DrandRandomSourceTests
 {
-    [Fact]
+    [Test]
     public async Task NextIntAsync_ReturnsValueInRange()
     {
         // Arrange
         var mockHandler = CreateMockHttpHandler("abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789");
-        var httpClient = new HttpClient(mockHandler.Object);
+        var httpClient = new HttpClient(mockHandler);
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source = new DrandRandomSource(httpClient, options);
         var round = RoundId.FromRound(1000);
@@ -23,10 +22,10 @@ public class DrandRandomSourceTests
         var result = await source.NextIntAsync(10, round);
 
         // Assert
-        Assert.InRange(result, 0, 9);
+        Assert.That(result, Is.InRange(0, 9));
     }
 
-    [Fact]
+    [Test]
     public async Task NextIntAsync_IsDeterministicForSameRound()
     {
         // Arrange - Same randomness should produce same result
@@ -34,8 +33,8 @@ public class DrandRandomSourceTests
         var mockHandler1 = CreateMockHttpHandler(fixedRandomness);
         var mockHandler2 = CreateMockHttpHandler(fixedRandomness);
         
-        var httpClient1 = new HttpClient(mockHandler1.Object);
-        var httpClient2 = new HttpClient(mockHandler2.Object);
+        var httpClient1 = new HttpClient(mockHandler1);
+        var httpClient2 = new HttpClient(mockHandler2);
         
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source1 = new DrandRandomSource(httpClient1, options);
@@ -48,28 +47,14 @@ public class DrandRandomSourceTests
         var result2 = await source2.NextIntAsync(10, round);
 
         // Assert
-        Assert.Equal(result1, result2);
+        Assert.That(result1, Is.EqualTo(result2));
     }
 
-    [Fact]
+    [Test]
     public async Task NextIntAsync_DifferentRandomnessGivesDifferentResults()
     {
         // Arrange
-        var mockHandler1 = CreateMockHttpHandler("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        var mockHandler2 = CreateMockHttpHandler("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-        
-        var httpClient1 = new HttpClient(mockHandler1.Object);
-        var httpClient2 = new HttpClient(mockHandler2.Object);
-        
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
-        var source1 = new DrandRandomSource(httpClient1, options);
-        var source2 = new DrandRandomSource(httpClient2, options);
-        
-        var round = RoundId.FromRound(1000);
-
-        // Act
-        var result1 = await source1.NextIntAsync(100, round);
-        var result2 = await source2.NextIntAsync(100, round);
 
         // Assert - Different randomness should likely give different results (not guaranteed but highly probable)
         // We test this multiple times to be confident
@@ -81,23 +66,23 @@ public class DrandRandomSourceTests
             var hex2 = new string('b', 63) + i.ToString("x");
             var mockH1 = CreateMockHttpHandler(hex1);
             var mockH2 = CreateMockHttpHandler(hex2);
-            var hc1 = new HttpClient(mockH1.Object);
-            var hc2 = new HttpClient(mockH2.Object);
+            var hc1 = new HttpClient(mockH1);
+            var hc2 = new HttpClient(mockH2);
             var s1 = new DrandRandomSource(hc1, options);
             var s2 = new DrandRandomSource(hc2, options);
             var r1 = await s1.NextIntAsync(100, RoundId.FromRound(i));
             var r2 = await s2.NextIntAsync(100, RoundId.FromRound(i));
             if (r1 != r2) differences++;
         }
-        Assert.True(differences > 5, "Different randomness should produce different results in most cases");
+        Assert.That(differences, Is.GreaterThan(5), "Different randomness should produce different results in most cases");
     }
 
-    [Fact]
+    [Test]
     public void NextInt_ReturnsValueInRange()
     {
         // Arrange
         var mockHandler = CreateMockHttpHandler("fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210");
-        var httpClient = new HttpClient(mockHandler.Object);
+        var httpClient = new HttpClient(mockHandler);
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source = new DrandRandomSource(httpClient, options);
         var round = RoundId.FromRound(1000);
@@ -106,71 +91,63 @@ public class DrandRandomSourceTests
         var result = source.NextInt(10, round);
 
         // Assert
-        Assert.InRange(result, 0, 9);
+        Assert.That(result, Is.InRange(0, 9));
     }
 
-    [Fact]
-    public async Task NextIntAsync_ThrowsForInvalidBound()
+    [Test]
+    public void NextIntAsync_ThrowsForInvalidBound()
     {
         // Arrange
         var mockHandler = CreateMockHttpHandler("test");
-        var httpClient = new HttpClient(mockHandler.Object);
+        var httpClient = new HttpClient(mockHandler);
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source = new DrandRandomSource(httpClient, options);
         var round = RoundId.FromRound(1000);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => source.NextIntAsync(0, round));
-        await Assert.ThrowsAsync<ArgumentException>(() => source.NextIntAsync(-1, round));
+        Assert.ThrowsAsync<ArgumentException>(async () => await source.NextIntAsync(0, round));
+        Assert.ThrowsAsync<ArgumentException>(async () => await source.NextIntAsync(-1, round));
     }
 
-    [Fact]
-    public async Task NextIntAsync_ThrowsForNullRound()
+    [Test]
+    public void NextIntAsync_ThrowsForNullRound()
     {
         // Arrange
         var mockHandler = CreateMockHttpHandler("test");
-        var httpClient = new HttpClient(mockHandler.Object);
+        var httpClient = new HttpClient(mockHandler);
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source = new DrandRandomSource(httpClient, options);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => source.NextIntAsync(10, null!));
+        Assert.ThrowsAsync<ArgumentNullException>(async () => await source.NextIntAsync(10, null!));
     }
 
-    [Fact]
-    public async Task NextIntAsync_ThrowsWhenRandomnessFieldMissing()
+    [Test]
+    public void NextIntAsync_ThrowsWhenRandomnessFieldMissing()
     {
         // Arrange
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(@"{""round"": 1000}")
-            });
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(@"{""round"": 1000}")
+        };
 
-        var httpClient = new HttpClient(mockHandler.Object);
+        var httpClient = new HttpClient(new TestHttpMessageHandler(response));
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source = new DrandRandomSource(httpClient, options);
         var round = RoundId.FromRound(1000);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => source.NextIntAsync(10, round));
-        Assert.Contains("randomness", exception.Message);
+        var exception = Assert.ThrowsAsync<InvalidOperationException>(async () => await source.NextIntAsync(10, round));
+        Assert.That(exception!.Message, Does.Contain("randomness"));
     }
 
-    [Fact]
+    [Test]
     public async Task GetRoundInfoAsync_ReturnsRoundData()
     {
         // Arrange
         var mockHandler = CreateMockHttpHandler("test123", 1234);
-        var httpClient = new HttpClient(mockHandler.Object);
+        var httpClient = new HttpClient(mockHandler);
         var options = Options.Create(new DrandOptions { RetryCount = 0 });
         var source = new DrandRandomSource(httpClient, options);
         var round = RoundId.FromRound(1234);
@@ -179,15 +156,14 @@ public class DrandRandomSourceTests
         var roundInfo = await source.GetRoundInfoAsync(round);
 
         // Assert
-        Assert.NotNull(roundInfo);
-        Assert.Contains("1234", roundInfo);
+        Assert.That(roundInfo, Is.Not.Null);
+        Assert.That(roundInfo, Does.Contain("1234"));
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(10)]
-    [InlineData(100)]
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(10)]
+    [TestCase(100)]
     public async Task NextIntAsync_ProducesUniformDistribution(int toExclusive)
     {
         // This is a basic sanity check, not a rigorous statistical test
@@ -201,7 +177,7 @@ public class DrandRandomSourceTests
             // Create distinct 64-character hex string for each iteration
             var hex = i.ToString("x").PadLeft(64, 'f');
             var mockHandler = CreateMockHttpHandler(hex);
-            var httpClient = new HttpClient(mockHandler.Object);
+            var httpClient = new HttpClient(mockHandler);
             var source = new DrandRandomSource(httpClient, options);
             var round = RoundId.FromRound(i);
             
@@ -212,29 +188,36 @@ public class DrandRandomSourceTests
         // Check that at least some buckets got at least one hit
         var nonZeroBuckets = counts.Count(c => c > 0);
         var expectedMinBuckets = Math.Max(toExclusive / 4, 1);
-        Assert.True(nonZeroBuckets >= expectedMinBuckets, 
+        Assert.That(nonZeroBuckets, Is.GreaterThanOrEqualTo(expectedMinBuckets), 
             $"Expected at least {expectedMinBuckets} non-zero buckets, got {nonZeroBuckets}");
     }
 
-    private static Mock<HttpMessageHandler> CreateMockHttpHandler(string randomness, long round = 1000)
+    private static HttpMessageHandler CreateMockHttpHandler(string randomness, long round = 1000)
     {
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent($@"{{
-                    ""round"": {round},
-                    ""randomness"": ""{randomness}"",
-                    ""signature"": ""test""
-                }}")
-            });
-        return mockHandler;
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent($@"{{
+                ""round"": {round},
+                ""randomness"": ""{randomness}"",
+                ""signature"": ""test""
+            }}")
+        };
+        return new TestHttpMessageHandler(response);
+    }
+
+    private class TestHttpMessageHandler : HttpMessageHandler
+    {
+        private readonly HttpResponseMessage _response;
+
+        public TestHttpMessageHandler(HttpResponseMessage response)
+        {
+            _response = response;
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_response);
+        }
     }
 }

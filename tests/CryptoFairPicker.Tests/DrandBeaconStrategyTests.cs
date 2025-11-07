@@ -1,36 +1,26 @@
 using CryptoFairPicker.Strategies;
-using Moq;
-using Moq.Protected;
 using System.Net;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests;
 
 public class DrandBeaconStrategyTests
 {
-    [Fact]
+    [Test]
     public async Task PickAsync_ReturnsValueInRange()
     {
         // Arrange
-        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(@"{
-                    ""round"": 1000,
-                    ""randomness"": ""abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"",
-                    ""signature"": ""test""
-                }")
-            });
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(@"{
+                ""round"": 1000,
+                ""randomness"": ""abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"",
+                ""signature"": ""test""
+            }")
+        };
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient = new HttpClient(new TestHttpMessageHandler(response));
         var strategy = new DrandBeaconStrategy(httpClient);
         const int optionCount = 10;
 
@@ -38,78 +28,62 @@ public class DrandBeaconStrategyTests
         var result = await strategy.PickAsync(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
-    public async Task PickAsync_ThrowsForInvalidOptionCount()
+    [Test]
+    public void PickAsync_ThrowsForInvalidOptionCount()
     {
         // Arrange
-        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var response = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent("{}") };
+        var httpClient = new HttpClient(new TestHttpMessageHandler(response));
         var strategy = new DrandBeaconStrategy(httpClient);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => strategy.PickAsync(0));
-        await Assert.ThrowsAsync<ArgumentException>(() => strategy.PickAsync(-1));
+        Assert.ThrowsAsync<ArgumentException>(async () => await strategy.PickAsync(0));
+        Assert.ThrowsAsync<ArgumentException>(async () => await strategy.PickAsync(-1));
     }
 
-    [Fact]
+    [Test]
     public async Task FetchRandomnessAsync_ParsesResponse()
     {
         // Arrange
-        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(@"{
-                    ""round"": 1000,
-                    ""randomness"": ""0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"",
-                    ""signature"": ""test""
-                }")
-            });
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(@"{
+                ""round"": 1000,
+                ""randomness"": ""0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"",
+                ""signature"": ""test""
+            }")
+        };
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient = new HttpClient(new TestHttpMessageHandler(response));
         var strategy = new DrandBeaconStrategy(httpClient);
 
         // Act
         var randomness = await strategy.FetchRandomnessAsync();
 
         // Assert
-        Assert.NotNull(randomness);
-        Assert.NotEmpty(randomness);
+        Assert.That(randomness, Is.Not.Null);
+        Assert.That(randomness, Is.Not.Empty);
     }
 
-    [Fact]
+    [Test]
     public void Pick_ReturnsValueInRange()
     {
         // Arrange
-        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(@"{
-                    ""round"": 1000,
-                    ""randomness"": ""fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"",
-                    ""signature"": ""test""
-                }")
-            });
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(@"{
+                ""round"": 1000,
+                ""randomness"": ""fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"",
+                ""signature"": ""test""
+            }")
+        };
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient = new HttpClient(new TestHttpMessageHandler(response));
         var strategy = new DrandBeaconStrategy(httpClient);
         const int optionCount = 10;
 
@@ -117,92 +91,68 @@ public class DrandBeaconStrategyTests
         var result = strategy.Pick(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public void Constructor_ThrowsForNullHttpClient()
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new DrandBeaconStrategy(null!));
     }
 
-    [Fact]
+    [Test]
     public async Task GetRoundInfoAsync_ReturnsRoundData()
     {
         // Arrange
-        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(@"{
-                    ""round"": 1234,
-                    ""randomness"": ""test"",
-                    ""signature"": ""test""
-                }")
-            });
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(@"{
+                ""round"": 1234,
+                ""randomness"": ""test"",
+                ""signature"": ""test""
+            }")
+        };
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient = new HttpClient(new TestHttpMessageHandler(response));
         var strategy = new DrandBeaconStrategy(httpClient);
 
         // Act
         var roundInfo = await strategy.GetRoundInfoAsync(1234);
 
         // Assert
-        Assert.NotNull(roundInfo);
-        Assert.Contains("1234", roundInfo);
+        Assert.That(roundInfo, Is.Not.Null);
+        Assert.That(roundInfo, Does.Contain("1234"));
     }
 
-    [Fact]
+    [Test]
     public async Task PickAsync_IsDeterministicForSameRandomness()
     {
         // Arrange
         const string fixedRandomness = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        var mockHttpMessageHandler1 = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler1
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent($@"{{
-                    ""round"": 1000,
-                    ""randomness"": ""{fixedRandomness}"",
-                    ""signature"": ""test""
-                }}")
-            });
+        var response1 = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent($@"{{
+                ""round"": 1000,
+                ""randomness"": ""{fixedRandomness}"",
+                ""signature"": ""test""
+            }}")
+        };
 
-        var mockHttpMessageHandler2 = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler2
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent($@"{{
-                    ""round"": 1000,
-                    ""randomness"": ""{fixedRandomness}"",
-                    ""signature"": ""test""
-                }}")
-            });
+        var response2 = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent($@"{{
+                ""round"": 1000,
+                ""randomness"": ""{fixedRandomness}"",
+                ""signature"": ""test""
+            }}")
+        };
 
-        var httpClient1 = new HttpClient(mockHttpMessageHandler1.Object);
-        var httpClient2 = new HttpClient(mockHttpMessageHandler2.Object);
+        var httpClient1 = new HttpClient(new TestHttpMessageHandler(response1));
+        var httpClient2 = new HttpClient(new TestHttpMessageHandler(response2));
         var strategy1 = new DrandBeaconStrategy(httpClient1);
         var strategy2 = new DrandBeaconStrategy(httpClient2);
         const int optionCount = 10;
@@ -212,6 +162,21 @@ public class DrandBeaconStrategyTests
         var result2 = await strategy2.PickAsync(optionCount);
 
         // Assert - Same randomness should produce same result
-        Assert.Equal(result1, result2);
+        Assert.That(result1, Is.EqualTo(result2));
+    }
+
+    private class TestHttpMessageHandler : HttpMessageHandler
+    {
+        private readonly HttpResponseMessage _response;
+
+        public TestHttpMessageHandler(HttpResponseMessage response)
+        {
+            _response = response;
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_response);
+        }
     }
 }

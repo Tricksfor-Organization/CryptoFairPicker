@@ -1,11 +1,11 @@
 using CryptoFairPicker.Csprng;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests.Csprng;
 
 public class CsprngRandomSourceTests
 {
-    [Fact]
+    [Test]
     public void NextInt_ReturnsValueInRange()
     {
         // Arrange
@@ -16,10 +16,10 @@ public class CsprngRandomSourceTests
         var result = source.NextInt(10, round);
 
         // Assert
-        Assert.InRange(result, 0, 9);
+        Assert.That(result, Is.InRange(0, 9));
     }
 
-    [Fact]
+    [Test]
     public async Task NextIntAsync_ReturnsValueInRange()
     {
         // Arrange
@@ -30,10 +30,10 @@ public class CsprngRandomSourceTests
         var result = await source.NextIntAsync(10, round);
 
         // Assert
-        Assert.InRange(result, 0, 9);
+        Assert.That(result, Is.InRange(0, 9));
     }
 
-    [Fact]
+    [Test]
     public void NextInt_ThrowsForInvalidBound()
     {
         // Arrange
@@ -45,7 +45,7 @@ public class CsprngRandomSourceTests
         Assert.Throws<ArgumentException>(() => source.NextInt(-1, round));
     }
 
-    [Fact]
+    [Test]
     public void NextInt_ProducesVariedResults()
     {
         // Arrange
@@ -60,10 +60,10 @@ public class CsprngRandomSourceTests
         }
 
         // Assert - Should get varied results (not all the same)
-        Assert.True(results.Count > 50, "CSPRNG should produce varied results");
+        Assert.That(results.Count, Is.GreaterThan(50), "CSPRNG should produce varied results");
     }
 
-    [Fact]
+    [Test]
     public void NextInt_IsNotDeterministic()
     {
         // Arrange - CSPRNG does NOT use round for determinism
@@ -78,6 +78,6 @@ public class CsprngRandomSourceTests
         }
 
         // Assert - Should get different results even with same round
-        Assert.True(results.Count > 10, "CSPRNG should produce non-deterministic results");
+        Assert.That(results.Count, Is.GreaterThan(10), "CSPRNG should produce non-deterministic results");
     }
 }

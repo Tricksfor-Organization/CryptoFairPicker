@@ -1,11 +1,11 @@
 using CryptoFairPicker.Strategies;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests;
 
 public class CommitRevealStrategyTests
 {
-    [Fact]
+    [Test]
     public void Pick_GeneratesCommitmentBeforePick()
     {
         // Arrange
@@ -16,12 +16,12 @@ public class CommitRevealStrategyTests
         var result = strategy.Pick(optionCount);
 
         // Assert
-        Assert.NotNull(strategy.CommitmentHash);
-        Assert.NotNull(strategy.Secret);
-        Assert.Equal(result, strategy.Result);
+        Assert.That(strategy.CommitmentHash, Is.Not.Null);
+        Assert.That(strategy.Secret, Is.Not.Null);
+        Assert.That(strategy.Result, Is.EqualTo(result));
     }
 
-    [Fact]
+    [Test]
     public void Pick_ReturnsValueInRange()
     {
         // Arrange
@@ -32,10 +32,10 @@ public class CommitRevealStrategyTests
         var result = strategy.Pick(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public void Commit_GeneratesCommitmentHash()
     {
         // Arrange
@@ -45,12 +45,12 @@ public class CommitRevealStrategyTests
         strategy.Commit();
 
         // Assert
-        Assert.NotNull(strategy.CommitmentHash);
-        Assert.NotNull(strategy.Secret);
-        Assert.Null(strategy.Result);
+        Assert.That(strategy.CommitmentHash, Is.Not.Null);
+        Assert.That(strategy.Secret, Is.Not.Null);
+        Assert.That(strategy.Result, Is.Null);
     }
 
-    [Fact]
+    [Test]
     public void Verify_SucceedsForCorrectSecret()
     {
         // Arrange
@@ -63,10 +63,10 @@ public class CommitRevealStrategyTests
         var isValid = strategy.Verify(secret, optionCount, result);
 
         // Assert
-        Assert.True(isValid);
+        Assert.That(isValid, Is.True);
     }
 
-    [Fact]
+    [Test]
     public void Verify_FailsForIncorrectSecret()
     {
         // Arrange
@@ -79,10 +79,10 @@ public class CommitRevealStrategyTests
         var isValid = strategy.Verify(wrongSecret, optionCount, result);
 
         // Assert
-        Assert.False(isValid);
+        Assert.That(isValid, Is.False);
     }
 
-    [Fact]
+    [Test]
     public void Verify_FailsForIncorrectResult()
     {
         // Arrange
@@ -96,10 +96,10 @@ public class CommitRevealStrategyTests
         var isValid = strategy.Verify(secret, optionCount, wrongResult);
 
         // Assert
-        Assert.False(isValid);
+        Assert.That(isValid, Is.False);
     }
 
-    [Fact]
+    [Test]
     public void Reset_ClearsAllState()
     {
         // Arrange
@@ -110,12 +110,12 @@ public class CommitRevealStrategyTests
         strategy.Reset();
 
         // Assert
-        Assert.Null(strategy.CommitmentHash);
-        Assert.Null(strategy.Secret);
-        Assert.Null(strategy.Result);
+        Assert.That(strategy.CommitmentHash, Is.Null);
+        Assert.That(strategy.Secret, Is.Null);
+        Assert.That(strategy.Result, Is.Null);
     }
 
-    [Fact]
+    [Test]
     public void Pick_IsDeterministicForSameSecret()
     {
         // Arrange
@@ -133,11 +133,11 @@ public class CommitRevealStrategyTests
 
         // Assert - Different instances should produce different results with different secrets
         // (This test verifies randomness between instances)
-        Assert.True(result1 >= 0 && result1 < optionCount);
-        Assert.True(result2 >= 0 && result2 < optionCount);
+        Assert.That(result1, Is.InRange(0, optionCount - 1));
+        Assert.That(result2, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public async Task PickAsync_ReturnsValueInRange()
     {
         // Arrange
@@ -148,10 +148,10 @@ public class CommitRevealStrategyTests
         var result = await strategy.PickAsync(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public void Pick_ThrowsForInvalidOptionCount()
     {
         // Arrange

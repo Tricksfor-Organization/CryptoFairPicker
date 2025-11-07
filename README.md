@@ -16,13 +16,13 @@ CryptoFairPicker is a .NET library that provides transparent, verifiable, and un
 ## 📦 Installation
 
 ```bash
-dotnet add package CryptoFairPicker
+dotnet add package Tricksfor.CryptoFairPicker
 ```
 
 Or add directly to your `.csproj`:
 
 ```xml
-<PackageReference Include="CryptoFairPicker" Version="2.0.0" />
+<PackageReference Include="Tricksfor.CryptoFairPicker" Version="9.*.*" />
 ```
 
 ## 🚀 Quick Start
@@ -30,7 +30,7 @@ Or add directly to your `.csproj`:
 ### Using Drand (Recommended)
 
 ```csharp
-using CryptoFairPicker;
+using Tricksfor.CryptoFairPicker;
 using Microsoft.Extensions.DependencyInjection;
 
 // Setup DI with drand

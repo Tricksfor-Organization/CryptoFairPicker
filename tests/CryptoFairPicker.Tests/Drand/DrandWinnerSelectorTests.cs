@@ -1,114 +1,114 @@
 using CryptoFairPicker.Drand;
-using Moq;
-using Xunit;
+using NSubstitute;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests.Drand;
 
 public class DrandWinnerSelectorTests
 {
-    [Fact]
+    [Test]
     public async Task PickWinnerAsync_ReturnsValueInCorrectRange()
     {
         // Arrange
-        var mockSource = new Mock<IFairRandomSource>();
+        var mockSource = Substitute.For<IFairRandomSource>();
         mockSource
-            .Setup(s => s.NextIntAsync(It.IsAny<int>(), It.IsAny<RoundId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(5);
+            .NextIntAsync(Arg.Any<int>(), Arg.Any<RoundId>(), Arg.Any<CancellationToken>())
+            .Returns(5);
         
-        var selector = new DrandWinnerSelector(mockSource.Object);
+        var selector = new DrandWinnerSelector(mockSource);
         var round = RoundId.FromRound(1000);
 
         // Act
         var winner = await selector.PickWinnerAsync(10, round);
 
         // Assert
-        Assert.Equal(6, winner); // 5 + 1 = 6 (1-indexed)
-        mockSource.Verify(s => s.NextIntAsync(10, round, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.That(winner, Is.EqualTo(6)); // 5 + 1 = 6 (1-indexed)
+        await mockSource.Received(1).NextIntAsync(10, round, Arg.Any<CancellationToken>());
     }
 
-    [Fact]
+    [Test]
     public void PickWinner_ReturnsValueInCorrectRange()
     {
         // Arrange
-        var mockSource = new Mock<IFairRandomSource>();
+        var mockSource = Substitute.For<IFairRandomSource>();
         mockSource
-            .Setup(s => s.NextInt(It.IsAny<int>(), It.IsAny<RoundId>()))
+            .NextInt(Arg.Any<int>(), Arg.Any<RoundId>())
             .Returns(3);
         
-        var selector = new DrandWinnerSelector(mockSource.Object);
+        var selector = new DrandWinnerSelector(mockSource);
         var round = RoundId.FromRound(1000);
 
         // Act
         var winner = selector.PickWinner(10, round);
 
         // Assert
-        Assert.Equal(4, winner); // 3 + 1 = 4 (1-indexed)
-        mockSource.Verify(s => s.NextInt(10, round), Times.Once);
+        Assert.That(winner, Is.EqualTo(4)); // 3 + 1 = 4 (1-indexed)
+        mockSource.Received(1).NextInt(10, round);
     }
 
-    [Fact]
+    [Test]
     public async Task PickWinnerAsync_Returns1ForFirstIndex()
     {
         // Arrange
-        var mockSource = new Mock<IFairRandomSource>();
+        var mockSource = Substitute.For<IFairRandomSource>();
         mockSource
-            .Setup(s => s.NextIntAsync(It.IsAny<int>(), It.IsAny<RoundId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(0);
+            .NextIntAsync(Arg.Any<int>(), Arg.Any<RoundId>(), Arg.Any<CancellationToken>())
+            .Returns(0);
         
-        var selector = new DrandWinnerSelector(mockSource.Object);
+        var selector = new DrandWinnerSelector(mockSource);
         var round = RoundId.FromRound(1000);
 
         // Act
         var winner = await selector.PickWinnerAsync(100, round);
 
         // Assert
-        Assert.Equal(1, winner); // 0 + 1 = 1
+        Assert.That(winner, Is.EqualTo(1)); // 0 + 1 = 1
     }
 
-    [Fact]
+    [Test]
     public async Task PickWinnerAsync_ReturnsNForLastIndex()
     {
         // Arrange
-        var mockSource = new Mock<IFairRandomSource>();
+        var mockSource = Substitute.For<IFairRandomSource>();
         mockSource
-            .Setup(s => s.NextIntAsync(It.IsAny<int>(), It.IsAny<RoundId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(99);
+            .NextIntAsync(Arg.Any<int>(), Arg.Any<RoundId>(), Arg.Any<CancellationToken>())
+            .Returns(99);
         
-        var selector = new DrandWinnerSelector(mockSource.Object);
+        var selector = new DrandWinnerSelector(mockSource);
         var round = RoundId.FromRound(1000);
 
         // Act
         var winner = await selector.PickWinnerAsync(100, round);
 
         // Assert
-        Assert.Equal(100, winner); // 99 + 1 = 100
+        Assert.That(winner, Is.EqualTo(100)); // 99 + 1 = 100
     }
 
-    [Fact]
-    public async Task PickWinnerAsync_ThrowsForInvalidN()
+    [Test]
+    public void PickWinnerAsync_ThrowsForInvalidN()
     {
         // Arrange
-        var mockSource = new Mock<IFairRandomSource>();
-        var selector = new DrandWinnerSelector(mockSource.Object);
+        var mockSource = Substitute.For<IFairRandomSource>();
+        var selector = new DrandWinnerSelector(mockSource);
         var round = RoundId.FromRound(1000);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => selector.PickWinnerAsync(0, round));
-        await Assert.ThrowsAsync<ArgumentException>(() => selector.PickWinnerAsync(-1, round));
+        Assert.ThrowsAsync<ArgumentException>(async () => await selector.PickWinnerAsync(0, round));
+        Assert.ThrowsAsync<ArgumentException>(async () => await selector.PickWinnerAsync(-1, round));
     }
 
-    [Fact]
-    public async Task PickWinnerAsync_ThrowsForNullRound()
+    [Test]
+    public void PickWinnerAsync_ThrowsForNullRound()
     {
         // Arrange
-        var mockSource = new Mock<IFairRandomSource>();
-        var selector = new DrandWinnerSelector(mockSource.Object);
+        var mockSource = Substitute.For<IFairRandomSource>();
+        var selector = new DrandWinnerSelector(mockSource);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => selector.PickWinnerAsync(10, null!));
+        Assert.ThrowsAsync<ArgumentNullException>(async () => await selector.PickWinnerAsync(10, null!));
     }
 
-    [Fact]
+    [Test]
     public void Constructor_ThrowsForNullSource()
     {
         // Act & Assert

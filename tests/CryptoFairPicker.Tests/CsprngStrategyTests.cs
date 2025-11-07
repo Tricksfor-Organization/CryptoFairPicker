@@ -1,11 +1,11 @@
 using CryptoFairPicker.Strategies;
-using Xunit;
+using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests;
 
 public class CsprngStrategyTests
 {
-    [Fact]
+    [Test]
     public void Pick_ReturnsValueInRange()
     {
         // Arrange
@@ -16,10 +16,10 @@ public class CsprngStrategyTests
         var result = strategy.Pick(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public void Pick_ThrowsForInvalidOptionCount()
     {
         // Arrange
@@ -30,7 +30,7 @@ public class CsprngStrategyTests
         Assert.Throws<ArgumentException>(() => strategy.Pick(-1));
     }
 
-    [Fact]
+    [Test]
     public async Task PickAsync_ReturnsValueInRange()
     {
         // Arrange
@@ -41,10 +41,10 @@ public class CsprngStrategyTests
         var result = await strategy.PickAsync(optionCount);
 
         // Assert
-        Assert.InRange(result, 0, optionCount - 1);
+        Assert.That(result, Is.InRange(0, optionCount - 1));
     }
 
-    [Fact]
+    [Test]
     public void Pick_ProducesUniformDistribution()
     {
         // Arrange
@@ -66,11 +66,11 @@ public class CsprngStrategyTests
         
         foreach (var count in counts)
         {
-            Assert.InRange(count, expected - tolerance, expected + tolerance);
+            Assert.That(count, Is.InRange(expected - tolerance, expected + tolerance));
         }
     }
 
-    [Fact]
+    [Test]
     public void Pick_ProducesDifferentValuesOverMultipleCalls()
     {
         // Arrange
@@ -85,6 +85,6 @@ public class CsprngStrategyTests
         }
 
         // Assert - Should have produced at least some different values
-        Assert.True(results.Count > 10, "Should produce varied results");
+        Assert.That(results.Count, Is.GreaterThan(10), "Should produce varied results");
     }
 }

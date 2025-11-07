@@ -2,32 +2,29 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageId>CryptoFairPicker</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>CryptoFairPicker Contributors</Authors>
-    <Company>CryptoFairPicker</Company>
-    <Description>A C# class library for fair, unbiased, and cryptographically secure winner selection. Features CSPRNG, Commit-Reveal, and external randomness beacon (drand) strategies with DI support.</Description>
-    <PackageTags>cryptography;random;fair;lottery;picker;winner;selection;csprng;drand;commit-reveal</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>Tricksfor.CryptoFairPicker</PackageId>
+    <!-- Include README in the generated NuGet package and set repository/project links -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Tricksfor-Organization/CryptoFairPicker</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Tricksfor-Organization/CryptoFairPicker</PackageProjectUrl>
+    <Authors>Tricksfor-Organization</Authors>
+    <Description>A C# library for fair and unbiased random selection using cryptographic techniques.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
-    <PackageReference Include="Polly" Version="8.5.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Polly" />
   </ItemGroup>
 
 </Project>
