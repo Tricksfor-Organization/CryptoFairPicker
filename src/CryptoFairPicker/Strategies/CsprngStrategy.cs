@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using CryptoFairPicker.Interfaces;
 
 namespace CryptoFairPicker.Strategies;
 

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using CryptoFairPicker.Interfaces;
 
 namespace CryptoFairPicker.Strategies;
 

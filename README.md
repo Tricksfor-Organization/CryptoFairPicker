@@ -30,7 +30,9 @@ Or add directly to your `.csproj`:
 ### Using Drand (Recommended)
 
 ```csharp
-using Tricksfor.CryptoFairPicker;
+using CryptoFairPicker.Extensions;
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 // Setup DI with drand
@@ -111,6 +113,8 @@ See [docs/VERIFY.md](docs/VERIFY.md) for detailed verification steps.
 Identifies a specific randomness round from drand:
 
 ```csharp
+using CryptoFairPicker.Models;
+
 // From round number
 var round = RoundId.FromRound(9000000);
 
@@ -129,6 +133,9 @@ if (round.TryGetRoundNumber(out long roundNum))
 Primary interface for selecting winners (1-indexed):
 
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 public interface IWinnerSelector
 {
     int PickWinner(int n, RoundId round);
@@ -145,6 +152,9 @@ public interface IWinnerSelector
 Lower-level interface for random number generation (0-indexed):
 
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 public interface IFairRandomSource
 {
     int NextInt(int toExclusive, RoundId round);
@@ -159,6 +169,8 @@ public interface IFairRandomSource
 Uses public randomness from the drand network:
 
 ```csharp
+using CryptoFairPicker.Extensions;
+
 services.AddCryptoFairPickerDrand(options =>
 {
     options.BaseUrl = "https://api.drand.sh/public";
@@ -184,6 +196,8 @@ services.AddCryptoFairPickerDrand(options =>
 Uses local cryptographically secure random number generator:
 
 ```csharp
+using CryptoFairPicker.Extensions;
+
 services.AddCryptoFairPickerCsprng();
 ```
 
@@ -204,6 +218,9 @@ services.AddCryptoFairPickerCsprng();
 Announce the round before it's published for maximum transparency:
 
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 // Calculate future round (approximately 1 hour from now)
 var futureRound = CalculateFutureRound(hoursFromNow: 1);
 
@@ -237,6 +254,9 @@ static long CalculateFutureRound(int hoursFromNow)
 ### Custom HttpClient Configuration
 
 ```csharp
+using CryptoFairPicker.Drand;
+using CryptoFairPicker.Extensions;
+
 services.AddHttpClient<DrandRandomSource>(client =>
 {
     client.BaseAddress = new Uri("https://api.drand.sh/");
@@ -251,6 +271,9 @@ services.AddCryptoFairPickerDrand();
 Create verifiable transcripts for public draws:
 
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 var round = RoundId.FromRound(9000000);
 var participants = 100;
 var winner = await selector.PickWinnerAsync(participants, round);
@@ -311,7 +334,49 @@ Robust error handling for network issues:
 - **Retries**: Automatic retry with exponential backoff (default 3 attempts)
 - **Clear errors**: Descriptive error messages when rounds don't exist or network fails
 
-## 📊 Testing
+## � Project Structure
+
+The library is organized following .NET best practices:
+
+```
+CryptoFairPicker/
+├── Interfaces/          # Core abstractions
+│   ├── IWinnerSelector.cs
+│   ├── IFairRandomSource.cs
+│   ├── IFairPicker.cs
+│   └── IPickerStrategy.cs
+├── Models/              # Value objects and data models
+│   └── RoundId.cs
+├── Services/            # Base service implementations
+│   ├── WinnerSelectorBase.cs
+│   └── FairPicker.cs
+├── Extensions/          # Dependency injection extensions
+│   ├── ServiceCollectionExtensions.cs
+│   └── WinnerSelectorServiceCollectionExtensions.cs
+├── Drand/              # Drand beacon implementation
+│   ├── DrandRandomSource.cs
+│   ├── DrandWinnerSelector.cs
+│   └── DrandOptions.cs
+├── Csprng/             # CSPRNG fallback implementation
+│   ├── CsprngRandomSource.cs
+│   └── CsprngWinnerSelector.cs
+└── Strategies/         # Legacy strategy pattern implementations
+    ├── DrandBeaconStrategy.cs
+    ├── CsprngStrategy.cs
+    └── CommitRevealStrategy.cs
+```
+
+### Namespaces
+
+- `CryptoFairPicker.Interfaces` - Core interface definitions
+- `CryptoFairPicker.Models` - Value objects like `RoundId`
+- `CryptoFairPicker.Services` - Base service implementations
+- `CryptoFairPicker.Extensions` - DI registration methods
+- `CryptoFairPicker.Drand` - Drand-specific implementations
+- `CryptoFairPicker.Csprng` - Local CSPRNG implementations
+- `CryptoFairPicker.Strategies` - Legacy strategy implementations
+
+## �📊 Testing
 
 Run the comprehensive test suite:
 
@@ -341,6 +406,9 @@ dotnet run
 The existing `IPickerStrategy` and `IFairPicker` interfaces remain available:
 
 ```csharp
+using CryptoFairPicker.Extensions;
+using CryptoFairPicker.Interfaces;
+
 // Old API still works
 services.AddCryptoFairPicker();  // CSPRNG
 services.AddDrandBeaconPicker(); // Drand (old API)

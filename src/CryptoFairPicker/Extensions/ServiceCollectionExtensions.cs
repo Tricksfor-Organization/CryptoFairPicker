@@ -1,7 +1,9 @@
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Services;
 using CryptoFairPicker.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CryptoFairPicker;
+namespace CryptoFairPicker.Extensions;
 
 /// <summary>
 /// Extension methods for registering CryptoFairPicker services with dependency injection.
@@ -49,9 +51,9 @@ public static class ServiceCollectionExtensions
     /// Adds CryptoFairPicker services with the Drand Beacon strategy.
     /// </summary>
     /// <param name="services">The service collection.</param>
-    /// <param name="beaconUrl">Optional custom beacon URL.</param>
+    /// <param name="beaconUrl">Custom beacon URL.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddDrandBeaconPicker(this IServiceCollection services, string? beaconUrl = null)
+    public static IServiceCollection AddDrandBeaconPicker(this IServiceCollection services, string beaconUrl)
     {
         services.AddHttpClient<DrandBeaconStrategy>();
         services.AddTransient<IPickerStrategy>(sp =>

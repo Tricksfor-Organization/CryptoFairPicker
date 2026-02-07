@@ -1,3 +1,4 @@
+using CryptoFairPicker.Services;
 using CryptoFairPicker.Strategies;
 using NUnit.Framework;
 

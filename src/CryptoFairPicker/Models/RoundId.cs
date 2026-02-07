@@ -1,4 +1,4 @@
-namespace CryptoFairPicker;
+namespace CryptoFairPicker.Models;
 
 /// <summary>
 /// Represents a unique identifier for a randomness round from a beacon like drand.

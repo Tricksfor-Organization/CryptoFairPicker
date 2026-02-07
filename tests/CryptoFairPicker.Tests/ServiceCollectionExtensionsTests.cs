@@ -1,3 +1,6 @@
+using CryptoFairPicker.Extensions;
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Services;
 using CryptoFairPicker.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -73,7 +76,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDrandBeaconPicker();
+        services.AddDrandBeaconPicker("https://drand.cloudflare.com/dbd1c8e7-9b0c-4a3e-9f5b-8c2e5f1a2b3c");
         var provider = services.BuildServiceProvider();
 
         // Assert
