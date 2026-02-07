@@ -18,7 +18,9 @@ A .NET library for transparent, verifiable, and unbiased winner selection. Perfe
 ### Using Drand (Recommended)
 
 ```csharp
-using CryptoFairPicker;
+using CryptoFairPicker.Extensions;
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection();
@@ -35,6 +37,10 @@ Console.WriteLine($"Winner: Participant #{winner}");
 ### Using Local CSPRNG (Fallback)
 
 ```csharp
+using CryptoFairPicker.Extensions;
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 services.AddCryptoFairPickerCsprng();
 var selector = provider.GetRequiredService<IWinnerSelector>();
 var round = RoundId.FromRound(1); // Ignored for CSPRNG
@@ -57,6 +63,8 @@ var winner = await selector.PickWinnerAsync(100, round);
 ```
 
 ```csharp
+using CryptoFairPicker.Extensions;
+
 builder.Services.AddCryptoFairPicker(builder.Configuration);
 ```
 
@@ -73,6 +81,9 @@ Anyone can verify the selection by fetching the same round from drand and reprod
 
 ### IWinnerSelector (Recommended)
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 int PickWinner(int n, RoundId round);
 Task<int> PickWinnerAsync(int n, RoundId round, CancellationToken ct = default);
 // Returns: Winner in range [1, n] (1-indexed)
@@ -80,6 +91,9 @@ Task<int> PickWinnerAsync(int n, RoundId round, CancellationToken ct = default);
 
 ### IFairRandomSource (Lower-level)
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 int NextInt(int toExclusive, RoundId round);
 Task<int> NextIntAsync(int toExclusive, RoundId round, CancellationToken ct = default);
 // Returns: Random value in range [0, toExclusive) (0-indexed)
@@ -88,6 +102,9 @@ Task<int> NextIntAsync(int toExclusive, RoundId round, CancellationToken ct = de
 ## Pre-announced Draws
 
 ```csharp
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
+
 // Announce the round publicly BEFORE it's published
 var futureRound = RoundId.FromRound(9500000);
 Console.WriteLine($"Draw will use drand round {futureRound}");

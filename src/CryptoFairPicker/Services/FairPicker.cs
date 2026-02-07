@@ -1,4 +1,6 @@
-namespace CryptoFairPicker;
+using CryptoFairPicker.Interfaces;
+
+namespace CryptoFairPicker.Services;
 
 /// <summary>
 /// Default implementation of IFairPicker that delegates to a strategy.

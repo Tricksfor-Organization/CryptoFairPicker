@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using CryptoFairPicker.Interfaces;
+using CryptoFairPicker.Models;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;

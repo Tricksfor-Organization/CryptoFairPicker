@@ -1,4 +1,6 @@
-namespace CryptoFairPicker;
+using CryptoFairPicker.Models;
+
+namespace CryptoFairPicker.Interfaces;
 
 /// <summary>
 /// Represents a source of fair, verifiable randomness for a specific round.

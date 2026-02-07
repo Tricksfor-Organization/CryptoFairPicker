@@ -1,4 +1,6 @@
-namespace CryptoFairPicker;
+using CryptoFairPicker.Models;
+
+namespace CryptoFairPicker.Interfaces;
 
 /// <summary>
 /// Represents a service that selects winners fairly using verifiable randomness.

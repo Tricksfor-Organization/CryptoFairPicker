@@ -1,6 +1,6 @@
 using CryptoFairPicker.Drand;
+using CryptoFairPicker.Models;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using System.Net;
 using NUnit.Framework;
 

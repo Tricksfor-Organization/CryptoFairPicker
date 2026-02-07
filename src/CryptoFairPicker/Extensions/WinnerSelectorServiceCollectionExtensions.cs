@@ -1,10 +1,10 @@
 using CryptoFairPicker.Csprng;
 using CryptoFairPicker.Drand;
+using CryptoFairPicker.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
-namespace CryptoFairPicker;
+namespace CryptoFairPicker.Extensions;
 
 /// <summary>
 /// Extension methods for registering drand and CSPRNG winner selection services with dependency injection.

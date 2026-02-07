@@ -1,4 +1,5 @@
 using CryptoFairPicker.Csprng;
+using CryptoFairPicker.Models;
 using NUnit.Framework;
 
 namespace CryptoFairPicker.Tests.Csprng;
