@@ -6,6 +6,8 @@ namespace CryptoFairPicker.Tests;
 
 public class DrandBeaconStrategyTests
 {
+    private const string DefaultBeaconUrl = "https://drand.cloudflare.com/dbd9b1e7c8e5c8fbe1a1b2cbe3e5f0cbe4a9b6d9fbbd8b0e7f1a1c3e4f0/round/latest";
+
     [Test]
     public async Task PickAsync_ReturnsValueInRange()
     {
@@ -21,7 +23,7 @@ public class DrandBeaconStrategyTests
         };
 
         var httpClient = new HttpClient(new TestHttpMessageHandler(response));
-        var strategy = new DrandBeaconStrategy(httpClient);
+        var strategy = new DrandBeaconStrategy(httpClient, DefaultBeaconUrl);
         const int optionCount = 10;
 
         // Act
@@ -37,7 +39,7 @@ public class DrandBeaconStrategyTests
         // Arrange
         var response = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent("{}") };
         var httpClient = new HttpClient(new TestHttpMessageHandler(response));
-        var strategy = new DrandBeaconStrategy(httpClient);
+        var strategy = new DrandBeaconStrategy(httpClient, DefaultBeaconUrl);
 
         // Act & Assert
         Assert.ThrowsAsync<ArgumentException>(async () => await strategy.PickAsync(0));
@@ -59,7 +61,7 @@ public class DrandBeaconStrategyTests
         };
 
         var httpClient = new HttpClient(new TestHttpMessageHandler(response));
-        var strategy = new DrandBeaconStrategy(httpClient);
+        var strategy = new DrandBeaconStrategy(httpClient, DefaultBeaconUrl);
 
         // Act
         var randomness = await strategy.FetchRandomnessAsync();
@@ -84,7 +86,7 @@ public class DrandBeaconStrategyTests
         };
 
         var httpClient = new HttpClient(new TestHttpMessageHandler(response));
-        var strategy = new DrandBeaconStrategy(httpClient);
+        var strategy = new DrandBeaconStrategy(httpClient, DefaultBeaconUrl);
         const int optionCount = 10;
 
         // Act
@@ -98,7 +100,7 @@ public class DrandBeaconStrategyTests
     public void Constructor_ThrowsForNullHttpClient()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new DrandBeaconStrategy(null!));
+        Assert.Throws<ArgumentNullException>(() => new DrandBeaconStrategy(null!, DefaultBeaconUrl));
     }
 
     [Test]
@@ -116,7 +118,7 @@ public class DrandBeaconStrategyTests
         };
 
         var httpClient = new HttpClient(new TestHttpMessageHandler(response));
-        var strategy = new DrandBeaconStrategy(httpClient);
+        var strategy = new DrandBeaconStrategy(httpClient, DefaultBeaconUrl);
 
         // Act
         var roundInfo = await strategy.GetRoundInfoAsync(1234);
@@ -153,8 +155,8 @@ public class DrandBeaconStrategyTests
 
         var httpClient1 = new HttpClient(new TestHttpMessageHandler(response1));
         var httpClient2 = new HttpClient(new TestHttpMessageHandler(response2));
-        var strategy1 = new DrandBeaconStrategy(httpClient1);
-        var strategy2 = new DrandBeaconStrategy(httpClient2);
+        var strategy1 = new DrandBeaconStrategy(httpClient1, DefaultBeaconUrl);
+        var strategy2 = new DrandBeaconStrategy(httpClient2, DefaultBeaconUrl);
         const int optionCount = 10;
 
         // Act
