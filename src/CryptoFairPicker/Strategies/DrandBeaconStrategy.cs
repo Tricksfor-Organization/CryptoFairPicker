@@ -7,22 +7,15 @@ namespace CryptoFairPicker.Strategies;
 /// A strategy that uses external randomness beacons like drand for verifiable randomness.
 /// drand provides public, verifiable randomness from a distributed network.
 /// </summary>
-public class DrandBeaconStrategy : IPickerStrategy
+/// <remarks>
+/// Initializes a new instance of DrandBeaconStrategy.
+/// </remarks>
+/// <param name="httpClient">HttpClient for making requests to the beacon.</param>
+/// <param name="beaconUrl">Optional custom beacon URL. Defaults to drand quicknet.</param>
+public class DrandBeaconStrategy(HttpClient httpClient, string beaconUrl) : IPickerStrategy
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _beaconUrl;
-
-    /// <summary>
-    /// Initializes a new instance of DrandBeaconStrategy.
-    /// </summary>
-    /// <param name="httpClient">HttpClient for making requests to the beacon.</param>
-    /// <param name="beaconUrl">Optional custom beacon URL. Defaults to drand quicknet.</param>
-    public DrandBeaconStrategy(HttpClient httpClient, string? beaconUrl = null)
-    {
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        // Default to drand's quicknet chain (faster, 3-second rounds)
-        _beaconUrl = beaconUrl ?? "https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/latest";
-    }
+    private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    private readonly string _beaconUrl = beaconUrl;
 
     /// <inheritdoc />
     public int Pick(int optionCount)
