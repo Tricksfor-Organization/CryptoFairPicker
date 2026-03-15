@@ -186,7 +186,7 @@ var publishTime = round.GetEstimatedTime();
 
 Console.WriteLine($"Draw round: {round.Value}");
 Console.WriteLine($"Round published at: {publishTime:O}");
-Console.WriteLine($"Verify: https://api.drand.sh/public/52db9ba.../{ round.Value}");
+Console.WriteLine($"Verify: https://api.drand.sh/public/52db9ba.../{round.Value}");
 ```
 
 ## Security Considerations
