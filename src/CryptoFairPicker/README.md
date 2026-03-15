@@ -87,6 +87,18 @@ using CryptoFairPicker.Models;
 int PickWinner(int n, RoundId round);
 Task<int> PickWinnerAsync(int n, RoundId round, CancellationToken ct = default);
 // Returns: Winner in range [1, n] (1-indexed)
+// With 10 participants, possible results are 1, 2, … 10
+```
+
+### RoundId Helpers
+```csharp
+using CryptoFairPicker.Models;
+
+// Convert a time to the corresponding drand quicknet round
+var round = RoundId.FromTime(DateTimeOffset.UtcNow.AddHours(1));
+
+// Get the estimated publication time for a round
+var publishTime = round.GetEstimatedTime();
 ```
 
 ### IFairRandomSource (Lower-level)
@@ -105,13 +117,18 @@ Task<int> NextIntAsync(int toExclusive, RoundId round, CancellationToken ct = de
 using CryptoFairPicker.Interfaces;
 using CryptoFairPicker.Models;
 
-// Announce the round publicly BEFORE it's published
-var futureRound = RoundId.FromRound(9500000);
-Console.WriteLine($"Draw will use drand round {futureRound}");
-Console.WriteLine($"Verify: https://api.drand.sh/public/.../9500000");
+// Calculate the round for a future draw time
+var drawTime = DateTimeOffset.UtcNow.AddHours(1);
+var round = RoundId.FromTime(drawTime);
+
+// Announce publicly
+var publishTime = round.GetEstimatedTime();
+Console.WriteLine($"Draw will use drand round {round.Value}");
+Console.WriteLine($"Round published at: {publishTime:O}");
+Console.WriteLine($"Verify: https://api.drand.sh/public/.../{round.Value}");
 
 // Wait for round to be published...
-var winner = await selector.PickWinnerAsync(100, futureRound);
+var winner = await selector.PickWinnerAsync(100, round);
 ```
 
 ## Testing

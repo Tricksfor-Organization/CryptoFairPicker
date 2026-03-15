@@ -118,6 +118,14 @@ using CryptoFairPicker.Models;
 // From round number
 var round = RoundId.FromRound(9000000);
 
+// From a point in time (uses drand quicknet chain parameters)
+var drawTime = DateTimeOffset.UtcNow.AddHours(1);
+var futureRound = RoundId.FromTime(drawTime);
+
+// Get the estimated publication time for a round
+var publishTime = futureRound.GetEstimatedTime();
+Console.WriteLine($"Round {futureRound.Value} will be published at {publishTime:O}");
+
 // From string
 var round = new RoundId("9000000");
 
@@ -221,34 +229,20 @@ Announce the round before it's published for maximum transparency:
 using CryptoFairPicker.Interfaces;
 using CryptoFairPicker.Models;
 
-// Calculate future round (approximately 1 hour from now)
-var futureRound = CalculateFutureRound(hoursFromNow: 1);
+// Calculate the round for a future draw time
+var drawTime = DateTimeOffset.UtcNow.AddHours(1);
+var round = RoundId.FromTime(drawTime);
 
 // Announce publicly
-Console.WriteLine($"The draw will use drand round {futureRound}");
-Console.WriteLine($"Verify at: https://api.drand.sh/public/.../({futureRound}");
+var publishTime = round.GetEstimatedTime();
+Console.WriteLine($"The draw will use drand round {round.Value}");
+Console.WriteLine($"Round will be published at: {publishTime:O}");
+Console.WriteLine($"Verify at: https://api.drand.sh/public/.../{round.Value}");
 
 // Wait for the round to be published...
-// (approximately 1 hour)
 
 // Perform the draw
-var winner = await selector.PickWinnerAsync(100, RoundId.FromRound(futureRound));
-```
-
-### Calculating Drand Rounds
-
-```csharp
-static long CalculateFutureRound(int hoursFromNow)
-{
-    // Drand quicknet genesis (approximate)
-    var genesisTime = new DateTimeOffset(2023, 2, 15, 14, 0, 0, TimeSpan.Zero);
-    var genesisRound = 7000000L;
-    var roundPeriod = 3; // seconds
-    
-    var futureTime = DateTimeOffset.UtcNow.AddHours(hoursFromNow);
-    var elapsed = futureTime - genesisTime;
-    return genesisRound + (long)(elapsed.TotalSeconds / roundPeriod);
-}
+var winner = await selector.PickWinnerAsync(100, round);
 ```
 
 ### Custom HttpClient Configuration
