@@ -145,37 +145,49 @@ dotnet run --project /path/to/CryptoFairPicker.Sample -- --verify-round $ROUND -
 
 ## Understanding Round Scheduling
 
-Drand quicknet produces rounds every 3 seconds. To calculate a future round:
+Drand quicknet produces rounds every 3 seconds. The library provides built-in helpers to convert between times and round numbers:
 
 ```csharp
-// Genesis parameters (approximate)
-var genesisTime = new DateTimeOffset(2023, 2, 15, 14, 0, 0, TimeSpan.Zero);
-var genesisRound = 7000000L;
-var roundPeriod = 3; // seconds
+using CryptoFairPicker.Models;
 
-// Calculate current round
-var now = DateTimeOffset.UtcNow;
-var elapsed = now - genesisTime;
-var currentRound = genesisRound + (long)(elapsed.TotalSeconds / roundPeriod);
+// Get the round for the current time
+var currentRound = RoundId.FromTime(DateTimeOffset.UtcNow);
+Console.WriteLine($"Current round: {currentRound.Value}");
 
-// Calculate future round (e.g., 1 hour from now)
-var futureTime = now.AddHours(1);
-var futureElapsed = futureTime - genesisTime;
-var futureRound = genesisRound + (long)(futureElapsed.TotalSeconds / roundPeriod);
+// Get the round for a future time (e.g., 1 hour from now)
+var futureTime = DateTimeOffset.UtcNow.AddHours(1);
+var futureRound = RoundId.FromTime(futureTime);
+Console.WriteLine($"Round in 1 hour: {futureRound.Value}");
 
-Console.WriteLine($"Current round: {currentRound}");
-Console.WriteLine($"Round in 1 hour: {futureRound}");
+// Get the estimated publication time for a round
+var publishTime = futureRound.GetEstimatedTime();
+Console.WriteLine($"Round will be published at: {publishTime:O}");
 ```
+
+> **Note:** `RoundId.FromTime` and `GetEstimatedTime` use the permanent drand quicknet chain parameters
+> (genesis 2023-08-23T15:29:27Z, 3-second period) so you don't need to track these constants yourself.
 
 ## Pre-announced Draws
 
 For maximum transparency, announce the round number before it's published:
 
-1. Calculate a future round (e.g., 24 hours from now)
-2. Publish the round number and participant list
+1. Calculate a future round using `RoundId.FromTime(drawTime)`
+2. Publish the round number, estimated publication time, and participant list
 3. Wait for the round to be published by drand
 4. Run the selection using that round
 5. Anyone can verify using the same round and participant count
+
+```csharp
+using CryptoFairPicker.Models;
+
+var drawTime = DateTimeOffset.UtcNow.AddHours(24);
+var round = RoundId.FromTime(drawTime);
+var publishTime = round.GetEstimatedTime();
+
+Console.WriteLine($"Draw round: {round.Value}");
+Console.WriteLine($"Round published at: {publishTime:O}");
+Console.WriteLine($"Verify: https://api.drand.sh/public/52db9ba.../{ round.Value}");
+```
 
 ## Security Considerations
 

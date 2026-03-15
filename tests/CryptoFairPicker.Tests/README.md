@@ -19,6 +19,8 @@ CryptoFairPicker.Tests/
 ├── Drand/
 │   ├── DrandRandomSourceTests.cs       - Drand HTTP API integration tests
 │   └── DrandWinnerSelectorTests.cs     - Drand winner selection tests
+├── Models/
+│   └── RoundIdTests.cs                 - RoundId time/round conversion tests
 ├── CommitRevealStrategyTests.cs        - Commit-reveal strategy tests
 ├── CsprngStrategyTests.cs              - CSPRNG strategy tests (old API)
 ├── DrandBeaconStrategyTests.cs         - Drand beacon strategy tests (old API)
@@ -45,18 +47,25 @@ CryptoFairPicker.Tests/
 - ✅ Network error handling (timeouts, retries)
 - ✅ Mock HTTP handlers for isolated testing
 
-#### 3. **Winner Selector Tests**
+#### 3. **RoundId Tests** (`Models/`)
+- ✅ `FromTime` converts time to correct round number
+- ✅ `GetEstimatedTime` returns correct publication time
+- ✅ Round-trip conversion (time → round → time)
+- ✅ Boundary conditions (genesis, mid-period)
+- ✅ Input validation (before genesis, invalid round)
+
+#### 5. **Winner Selector Tests**
 - ✅ 1-indexed winner selection [1, n]
 - ✅ Correct offset from 0-indexed random source
 - ✅ Boundary conditions (first/last participant)
 - ✅ Input validation
 
-#### 4. **Strategy Tests** (Legacy API)
+#### 6. **Strategy Tests** (Legacy API)
 - ✅ CommitReveal: commitment hash generation, verification
 - ✅ CSPRNG: local random generation, distribution
 - ✅ DrandBeacon: HTTP integration, determinism
 
-#### 5. **Integration Tests**
+#### 7. **Integration Tests**
 - ✅ Dependency injection setup
 - ✅ Service registration validation
 - ✅ Configuration binding

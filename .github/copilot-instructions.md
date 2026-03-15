@@ -8,7 +8,7 @@ CryptoFairPicker is a .NET 9.0 library providing cryptographically secure, verif
 
 ### Core Abstractions
 
-1. **RoundId**: Immutable record identifying a specific randomness round
+1. **RoundId**: Immutable record identifying a specific randomness round. Includes `FromTime(DateTimeOffset)` for time-to-round conversion and `GetEstimatedTime()` for the reverse.
 2. **IFairRandomSource**: Interface for obtaining random values for a specific round (0-indexed)
 3. **IWinnerSelector**: Interface for selecting winners (1-indexed, range [1, n])
 
@@ -186,7 +186,10 @@ services.AddHttpClient<DrandRandomSource>();
 
 - **Quicknet**: Chain hash `52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971`
 - **Round period**: 3 seconds
-- **Genesis**: Approximately round 7000000 at 2023-02-15 14:00 UTC
+- **Genesis time**: 2023-08-23T15:29:27Z (Unix 1692803367)
+- **Genesis round**: 1
+
+> The quicknet genesis parameters are hardcoded in `RoundId` for `FromTime` and `GetEstimatedTime`.
 
 ### API Endpoints
 
@@ -199,9 +202,11 @@ GET https://api.drand.sh/public/{chain}/{round}      - Specific round
 ### Round Calculation
 
 ```csharp
-// Current round (approximate)
-var elapsed = DateTimeOffset.UtcNow - genesisTime;
-var currentRound = genesisRound + (long)(elapsed.TotalSeconds / roundPeriod);
+// Convert a time to the corresponding drand quicknet round
+var round = RoundId.FromTime(DateTimeOffset.UtcNow.AddHours(1));
+
+// Get the estimated publication time for a round
+var publishTime = round.GetEstimatedTime();
 ```
 
 ## Security Considerations
