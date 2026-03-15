@@ -54,18 +54,18 @@ CryptoFairPicker.Tests/
 - ✅ Boundary conditions (genesis, mid-period)
 - ✅ Input validation (before genesis, invalid round)
 
-#### 5. **Winner Selector Tests**
+#### 4. **Winner Selector Tests**
 - ✅ 1-indexed winner selection [1, n]
 - ✅ Correct offset from 0-indexed random source
 - ✅ Boundary conditions (first/last participant)
 - ✅ Input validation
 
-#### 6. **Strategy Tests** (Legacy API)
+#### 5. **Strategy Tests** (Legacy API)
 - ✅ CommitReveal: commitment hash generation, verification
 - ✅ CSPRNG: local random generation, distribution
 - ✅ DrandBeacon: HTTP integration, determinism
 
-#### 7. **Integration Tests**
+#### 6. **Integration Tests**
 - ✅ Dependency injection setup
 - ✅ Service registration validation
 - ✅ Configuration binding
